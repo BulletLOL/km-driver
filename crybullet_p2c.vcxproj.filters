@@ -1,0 +1,81 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="source_ctx">
+      <UniqueIdentifier>{52093dee-bc82-4af0-b0c3-9a7d9013ebc9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core_ctx">
+      <UniqueIdentifier>{481e39ba-8f59-4005-a852-bcf6e4fa70d1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="memory_ctx">
+      <UniqueIdentifier>{0c7413a7-c8f3-4014-83a6-3991bd79e811}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="system_ctx">
+      <UniqueIdentifier>{dc01ae58-8d42-4921-b6f7-16d61ded9f34}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="process_ctx">
+      <UniqueIdentifier>{aa14564f-171b-4c85-be20-a85d860d9573}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="util_ctx">
+      <UniqueIdentifier>{6c64b248-7082-4a0b-80af-d732c34490c2}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp">
+      <Filter>source_ctx</Filter>
+    </ClCompile>
+    <ClCompile Include="hook.cpp">
+      <Filter>core_ctx</Filter>
+    </ClCompile>
+    <ClCompile Include="memory.cpp">
+      <Filter>memory_ctx</Filter>
+    </ClCompile>
+    <ClCompile Include="phys.cpp">
+      <Filter>memory_ctx</Filter>
+    </ClCompile>
+    <ClCompile Include="system_functions.cpp">
+      <Filter>system_ctx</Filter>
+    </ClCompile>
+    <ClCompile Include="process_functions.cpp">
+      <Filter>process_ctx</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="framework.h">
+      <Filter>core_ctx</Filter>
+    </ClInclude>
+    <ClInclude Include="hook.h">
+      <Filter>core_ctx</Filter>
+    </ClInclude>
+    <ClInclude Include="xorstr.h">
+      <Filter>util_ctx</Filter>
+    </ClInclude>
+    <ClInclude Include="include.h">
+      <Filter>util_ctx</Filter>
+    </ClInclude>
+    <ClInclude Include="defines.h">
+      <Filter>util_ctx</Filter>
+    </ClInclude>
+    <ClInclude Include="memory.h">
+      <Filter>memory_ctx</Filter>
+    </ClInclude>
+    <ClInclude Include="phys.h">
+      <Filter>memory_ctx</Filter>
+    </ClInclude>
+    <ClInclude Include="system_functions.h">
+      <Filter>system_ctx</Filter>
+    </ClInclude>
+    <ClInclude Include="crt.h">
+      <Filter>util_ctx</Filter>
+    </ClInclude>
+    <ClInclude Include="nt.h">
+      <Filter>util_ctx</Filter>
+    </ClInclude>
+    <ClInclude Include="ia32.h">
+      <Filter>util_ctx</Filter>
+    </ClInclude>
+    <ClInclude Include="process_functions.h">
+      <Filter>process_ctx</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
