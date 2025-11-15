@@ -1,81 +1,142 @@
 Kernel Driver Communication Framework
-A Windows kernel driver that creates a hidden communication channel between userland applications and the kernel by hooking into the Windows graphics system.
-What is this?
-This project is a kernel-mode driver that lets user-mode programs perform privileged operations without using the normal Windows driver communication methods. Instead of creating a device that shows up in the system, it hooks an existing function in win32kbase.sys to stay under the radar.
-Think of it as a secret backdoor into kernel space that doesn't look like a typical driver.
-Features
+
+A Windows kernel driver that creates a hidden communication channel between userland applications and the kernel by hooking into the Windows graphics subsystem.
+
+📌 What Is This?
+
+This project is a kernel-mode driver that allows user-mode programs to perform privileged operations without using standard Windows driver communication (e.g., CreateFile, DeviceIoControl).
+
+Instead of exposing a visible device, it hooks an internal function in win32kbase.sys, giving usermode a stealthy entry point into kernel space.
+
+Think of it as a hidden backdoor-style communication path that does not look like a typical driver.
+
+✨ Features
 Memory Operations
 
-Read and write to any process's memory
+Read/write memory of any process
+
 Direct physical memory access (bypasses normal protections)
-Allocate and free memory in other processes
-Change memory permissions (make pages executable, writable, etc.)
 
-Advanced Stuff
+Allocate/free memory in remote processes
 
-Bypass Control Flow Guard (CFG) protection
-Allocate executable memory in kernel space
-Expose kernel memory to userland processes
-Find byte patterns in memory (signature scanning)
-Get module base addresses from any process
-Atomic pointer swapping in target processes
+Modify memory protections (RWX, etc.)
+
+Advanced Capabilities
+
+Bypass Control Flow Guard (CFG)
+
+Allocate executable kernel memory
+
+Expose kernel memory to user-mode
+
+Signature scanning (AOB / pattern scans)
+
+Retrieve module base addresses
+
+Atomic pointer swaps in target processes
 
 Safety Features
 
-Validates all requests with a static identifier
-Verifies calls come from user mode
-Handles process context switching properly
-Checks physical memory ranges before access
+Validates requests with a static identifier
 
-How it works
-The driver does something clever to avoid detection:
+Ensures calls originate from user mode
 
-Finds the NtGdiPolyPolyDraw function in win32kbase.sys (part of Windows graphics)
-Locates an unused function pointer inside that function
-Replaces it with our own handler
-Now when userland calls through this pointer with the right parameters, our code runs
+Proper handling of process context switching
 
-This means there's no visible driver device object that security tools typically look for.
-Physical Memory Engine
-One of the cooler parts is the physical memory access system. It can:
+Validates physical memory ranges before mapping
 
-Map any physical address to a virtual address on the fly
-Handle different page sizes (4KB, 2MB, 1GB)
-Walk page tables manually (PML4 → PDPT → PD → PT)
-Work safely even at high IRQL levels
+🛠️ How It Works
 
-Communication
-Userland programs communicate by calling the hooked function with:
+The driver avoids detection using a clever hooking technique:
+
+Locates NtGdiPolyPolyDraw inside win32kbase.sys
+
+Finds an unused function pointer inside it
+
+Overwrites that pointer with our custom handler
+
+Usermode calls the hooked path → kernel code executes
+
+No device object.
+No symbolic link.
+No traditional IOCTL interface.
+
+This makes it much harder for security software to detect.
+
+🔧 Physical Memory Engine
+
+The physical memory subsystem can:
+
+Map any physical address into virtual memory
+
+Support multiple page sizes: 4KB, 2MB, 1GB
+
+Walk full x64 page tables manually
+
+PML4 → PDPT → PD → PT
+
+Operate safely at high IRQL
+
+Build mappings on-the-fly for controlled access
+
+📡 Communication Model
+
+User-mode communicates by calling the hooked function using:
 
 A pointer to a command structure
+
 A static identifier for validation
-An operation code telling it what to do
 
-The driver processes the request and returns results through the same structure.
-Why is this interesting?
-Most kernel drivers use CreateFile and DeviceIoControl which are easy to detect and monitor. This approach:
+An operation code
 
-Leaves no device object trail
-Hides inside legitimate Windows components
-Uses existing function calls
-Harder for security software to spot
+The driver processes the request and returns the results through the same structure.
 
-It's basically a proof-of-concept for stealthy kernel communication.
-Technical notes
+🤔 Why Is This Interesting?
 
-Works on Windows 10/11 x64
-Uses CR3 manipulation to switch process contexts
-Implements proper synchronization for multi-core safety
-CFG bypass patches both validation and dispatch functions
-MDL-based allocations for aligned kernel buffers
+Typical kernel drivers leave obvious artifacts:
 
-Warning
-This is research code to demonstrate kernel programming techniques. It's meant for learning how Windows internals work, not for any malicious purpose. Only use this on your own systems or in authorized testing environments.
+Device objects
 
-Requirements
+IOCTL interfaces
+
+Registry entries
+
+This approach instead:
+
+Creates no visible device object
+
+Hides inside legitimate Windows internals
+
+Uses existing system calls
+
+Reduces detection surface for security tools
+
+A strong proof-of-concept for stealthy kernel communication.
+
+📄 Technical Notes
+
+Supports Windows 10/11 x64
+
+Uses CR3 switching for process context manipulation
+
+Fully synchronized for multi-core environments
+
+Implements CFG bypass (validation + dispatch patching)
+
+Uses MDL-based allocation for aligned kernel buffers
+
+⚠️ Warning
+
+This project is for research and educational purposes only.
+Use only on systems you own or have explicit authorization to test.
+Not intended for malicious use.
+
+📦 Requirements
 
 Windows Driver Kit (WDK)
-Visual Studio 2019 or newer
-Test signing enabled or disable driver signature enforcement
-Understanding of Windows kernel development
 
+Visual Studio 2019 or newer
+
+Test signing enabled, or driver signature enforcement disabled
+
+Knowledge of Windows kernel development
