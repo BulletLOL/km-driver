@@ -1,99 +1,95 @@
-Kernel Driver Communication Framework
+#Kernel Driver Communication Framework
 
 A Windows kernel driver that creates a hidden communication channel between userland applications and the kernel by hooking into the Windows graphics subsystem.
 
-📌 What Is This?
+What Is This?
 
-This project is a kernel-mode driver that allows user-mode programs to perform privileged operations without using standard Windows driver communication (e.g., CreateFile, DeviceIoControl).
+This project is a kernel-mode driver that allows user-mode programs to perform privileged operations without using standard Windows driver communication paths.
+Instead of exposing a device object, it hooks an internal function in win32kbase.sys, providing a stealthy kernel communication channel.
 
-Instead of exposing a visible device, it hooks an internal function in win32kbase.sys, giving usermode a stealthy entry point into kernel space.
-
-Think of it as a hidden backdoor-style communication path that does not look like a typical driver.
-
-✨ Features
+Features
 Memory Operations
 
-Read/write memory of any process
+Read and write memory of any process
 
-Direct physical memory access (bypasses normal protections)
+Direct physical memory access
 
-Allocate/free memory in remote processes
+Allocate and free memory in other processes
 
-Modify memory protections (RWX, etc.)
+Modify page protections (RWX, etc.)
 
 Advanced Capabilities
 
-Bypass Control Flow Guard (CFG)
+Control Flow Guard (CFG) bypass
 
 Allocate executable kernel memory
 
 Expose kernel memory to user-mode
 
-Signature scanning (AOB / pattern scans)
+Signature (pattern) scanning
 
 Retrieve module base addresses
 
-Atomic pointer swaps in target processes
+Atomic pointer swapping
 
 Safety Features
 
-Validates requests with a static identifier
+Static identifier validation
 
-Ensures calls originate from user mode
+Ensures the caller is from user mode
 
-Proper handling of process context switching
+Proper process context switching
 
-Validates physical memory ranges before mapping
+Physical memory range validation
 
-🛠️ How It Works
+How It Works
 
-The driver avoids detection using a clever hooking technique:
+The driver avoids detection using a hook inside the Windows graphics driver:
 
-Locates NtGdiPolyPolyDraw inside win32kbase.sys
+Hooking Procedure
 
-Finds an unused function pointer inside it
+Locate NtGdiPolyPolyDraw in win32kbase.sys
 
-Overwrites that pointer with our custom handler
+Identify an unused function pointer within it
 
-Usermode calls the hooked path → kernel code executes
+Replace this pointer with the driver’s handler
 
-No device object.
-No symbolic link.
-No traditional IOCTL interface.
+User-mode calls the function → kernel handler executes
 
-This makes it much harder for security software to detect.
+This eliminates the need for CreateFile/DeviceIoControl, leaving no driver-visible artifacts.
 
-🔧 Physical Memory Engine
+Physical Memory Engine
+Capabilities
 
-The physical memory subsystem can:
+Map arbitrary physical addresses
 
-Map any physical address into virtual memory
+Support 4KB, 2MB, and 1GB pages
 
-Support multiple page sizes: 4KB, 2MB, 1GB
-
-Walk full x64 page tables manually
+Manual page-table walking
 
 PML4 → PDPT → PD → PT
 
-Operate safely at high IRQL
+High-IRQL safe mappings
 
-Build mappings on-the-fly for controlled access
+On-demand mapping construction
 
-📡 Communication Model
+Communication
 
-User-mode communicates by calling the hooked function using:
+User-mode sends operations by calling the hooked function with:
 
 A pointer to a command structure
 
-A static identifier for validation
+A static validation ID
 
 An operation code
 
-The driver processes the request and returns the results through the same structure.
+The driver performs the requested action and writes the results back into the same structure.
 
-🤔 Why Is This Interesting?
+Why Is This Interesting?
 
-Typical kernel drivers leave obvious artifacts:
+Traditional drivers leave clear traces:
+
+Driver objects
 
 Device objects
 
@@ -101,42 +97,41 @@ IOCTL interfaces
 
 Registry entries
 
-This approach instead:
+This approach:
 
-Creates no visible device object
+Creates no device object
 
-Hides inside legitimate Windows internals
+Hides inside Windows graphics internals
 
-Uses existing system calls
+Reuses existing system call paths
 
-Reduces detection surface for security tools
+Reduces detection surface
 
-A strong proof-of-concept for stealthy kernel communication.
+A strong demonstration of stealthy kernel-to-user communication.
 
-📄 Technical Notes
+Technical Notes
 
-Supports Windows 10/11 x64
+Works on Windows 10/11 x64
 
-Uses CR3 switching for process context manipulation
+Uses CR3 manipulation for context switching
 
-Fully synchronized for multi-core environments
+Thread-safe with proper synchronization
 
-Implements CFG bypass (validation + dispatch patching)
+CFG bypass patches both validation and dispatch routines
 
-Uses MDL-based allocation for aligned kernel buffers
+MDL-based kernel memory allocations
 
-⚠️ Warning
+Warning
 
-This project is for research and educational purposes only.
-Use only on systems you own or have explicit authorization to test.
-Not intended for malicious use.
+This project is intended for research and educational purposes only.
+Use it only on systems you own or have explicit permission to test.
 
-📦 Requirements
+Requirements
 
 Windows Driver Kit (WDK)
 
 Visual Studio 2019 or newer
 
-Test signing enabled, or driver signature enforcement disabled
+Test signing enabled or disabled driver signature enforcement
 
-Knowledge of Windows kernel development
+Understanding of Windows kernel development
